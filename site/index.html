@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Jamstack URL Shortener | FYDLI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" type="text/css" href="/assets/styles.css">
+    <meta name="robots" content="index, nofollow, noarchive">
+    <meta name="description" content="JAMStack link shortener using Netlify functions and Supabase.">
+    <!--
+      favicon assest via https://favicon.io
+    -->
+    <link rel="icon" href="/assets/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+  </head>
+  <body>
+
+    <main>
+
+      <h1>Shorten a URL</h1>
+
+      <form name="shorten">
+        <p>
+          <label>
+            <input type="url" name="long_url" placeholder="https://example.com/a/really/long/url/is-a-pain-to-remember">
+          </label>
+        </p>
+        <p>
+          <button type="submit">Add</button>
+        </p>
+      </form>
+
+      <p id="result"><strong>Notice:</strong> Local Storage is used for your unique ID to manage links.</p>
+      
+      <p><a href="/manage" title="Manage Links">Manage Links</a></p>
+
+    </main>
+
+    <footer>
+
+      <section>
+        <h3>Short URL Generation</h3>
+        <p>No, the option to choose a short URL is not available. Short URLs are automatically generated using a custom character set that excludes easy-to-confuse characters (such as 1 and l.) Over 600 million combinations are available using a string length of 5 (57^5.)</p>
+      </section>
+      
+      <section>
+        <h3>Can I Delete/Edit A Link</h3>
+        <p>Deletion is not possible, but disabling is. Disabling a link on the <a href="/manage" title="Link List">Link List</a> page marks it as <em>disabled</em> in Supabase. This is irreversible and removes it from your link list. It does not delete it as doing so would open the possibly of the same short code being regenerated.</p>
+        <p>Editing is not possible. Disable the link and make another.</p>
+      </section>
+      
+      <section>
+        <h3>About FYDLI</h3>
+        <p>FYDLI is a <a href="/jam" title="Jamstack" rel="noopener nofollow">Jamstack</a> URL shortener hosted on <a href="/ntl" title="Netlify" rel="noopener nofollow">Netlify</a> with data stored in <a href="/sb" title="Supabase">Supabase</a>. It is (currently) open to anyone who wants to create a link (this may change if the service sees too much abuse.)</p>
+      </section>
+
+      <section>
+        <h3>Issues, Abuse, etc...</h3>
+        <p>Have an issue with the site? Open an issue <a href="/issue" title="GitHub repository" rel="noopener nofollow">here</a></p>
+        <p>Found a link that leads to malware, phishing, spam, or other illegal (or questionable) content? Send a message <a href="/contact" title="Contact form" rel="noopener nofollow">here</a>.</p>
+      </section>
+
+      <section class="copyright">
+        <p>&copy; FYDLI | <a href="/license" title="License">Jam License</a> | <a href="/git" title="GitHub Repository">GitHub</a> | <a href="/terms" title="Terms of Use">Terms</a></p>
+      </section>
+
+    </footer>
+
+    <script nonce="9fe3abc61d7a">
+      //
+      // SPDX-License-Identifier: Jam
+      //
+
+      const fydliID = (() => {
+        // read user ID
+        let id = localStorage.getItem('fydli_user_id');
+        // ID does not exist
+        if (id === null) {
+          // randomUUID is a function
+          if (typeof crypto.randomUUID === "function") {
+            const newId = crypto.randomUUID();
+            localStorage.setItem('fydli_user_id', newId);
+            // assign ID
+            id = newId;
+          }
+          // randomUUID isn't a function (i.e. Safari < 15.4)
+          else {
+            try {
+              // try fetching from function
+              fetch('/.netlify/functions/new-uuid')
+                .then(res => res.text())
+                .then(uuid => {
+                  localStorage.setItem('fydli_user_id', uuid)
+                })
+              // assign ID
+              id = localStorage.getItem('fydli_user_id');
+            } catch(err) {
+              // log error
+              console.log(err)
+            }
+          }
+        }
+        // return ID
+        return id;
+      })();
+
+      document.forms.shorten.addEventListener('submit', async (event) => {
+
+        event.preventDefault();
+
+        const form = event.target.elements;
+        const result = document.getElementById('result');
+        result.innerHTML = "Working...";
+
+        copyShortLink = (e) => {
+          if (e.code === "Enter" || e.type === "click"){
+            // Link
+            const link = e.target.innerText;
+            // Parent element
+            const pe = e.target.parentElement;
+            // Wrap in a try/catch in the off chance clipboard events disabled
+            try {
+              // Write to clipboard
+              navigator.clipboard.writeText(link)
+              .then(res=>{
+                // Write success message to parent element
+                pe.innerHTML = `<strong>${link}</strong> copied to clipboard successfully`;
+              });
+            }
+            // Clipboard events unavailable
+            catch(err) {
+              alert(`Unable to copy ${link} to clipboard.`);
+              console.log(err);
+            }
+          }
+        };
+        
+        fetch("/app/new-link", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            long_url: form.long_url.value,
+            userId: fydliID
+          })
+        })
+        .then(res => res.json())
+        .then(d => {
+          if (d.created === true) {
+            // Set image colours inverse of colour scheme
+            // (dark = foreground, light = background)
+            const imgColors = (window.matchMedia('(prefers-color-scheme: light)').matches === true) ? 'dark=fafafa,light=202020':'dark=202020,light=fafafa';
+            // Output
+            result.innerHTML = `<a class="qrlink" href="/qr/dl/${d.code}" title="Download QR Code"><img src="/qr/width=40,${imgColors}/${d.code}" width="40" height="40"></a> <span>Copy to clipboard: <a id="shortLink" tabindex="0">${d.short_url}</a></span>`;
+            // Copy to clipboard event listener
+            result.querySelector('a#shortLink').addEventListener('click', copyShortLink);
+            // keyboard copy to clipboard
+            result.querySelector('a#shortLink').addEventListener('keydown', copyShortLink);
+          }
+          else {
+            result.innerHTML = d.message;
+          }
+        })
+        .catch(err => result.innerHTML = err)
+      });
+    </script>
+    
+  </body>
+</html>

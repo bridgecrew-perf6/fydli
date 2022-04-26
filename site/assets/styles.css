@@ -1,0 +1,279 @@
+/**
+ * Colours
+ */
+/* dark (default) */
+:root {
+  --bgColour: #202020;
+  --highlightColour: #0000FF;
+  --fgColour: #f0f0f0;
+}
+/* light */
+@media screen and (prefers-color-scheme: light) {
+  :root {
+    --bgColour: #f0f0f0;
+    --highlightColour: #0000FF;
+    --fgColour: #202020;
+  }  
+}
+/**
+ * Main layout
+ */
+body,
+input,
+button,
+p,
+h1,
+form {
+  font-family: 'Courier New', Courier, monospace;
+  color: var(--fgColour)
+}
+body,
+html {
+  background-color: var(--bgColour);
+  margin: 0;
+  padding: 0;
+  font-size: 100%;
+  height: 100vh;
+}
+main {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+@media screen and (max-width: 600px) {
+  main {
+    margin-top: 10vh;
+    min-height: 50vh;
+    justify-content: unset;
+  }
+}
+main#contact,
+main#terms,
+main#linklist {
+  min-height: 80vh;
+  min-height: 80vh;
+}
+main#terms {
+  width: 90vw;
+  max-width: 600px;
+  margin: 0 auto;
+}
+main#linklist {
+  justify-content: unset;
+  margin-top: 3rem;
+}
+/**
+ * Basic links
+ */
+a {
+  color: var(--fgColour);
+  font-weight: 600;
+  text-decoration: underline;
+  font-style: italic;
+}
+a:hover {
+  text-decoration: underline dashed;
+}
+a:focus {
+  background-color: var(--fgColour);
+  color: var(--bgColour);
+}
+/**
+ * Forms
+ */
+form[name=shorten] {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+form[name=contact] {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+/* Trying to make contact form look good on all (most) screen sizes */
+@media screen and (min-width: 1201px) {
+  form[name=contact] {
+    width: 50vw;
+    max-width: 800px
+  }
+}
+@media screen and (max-width: 1200px) {
+  form[name=contact] {
+    width: 60vw;
+    max-width: 800px
+  }
+}
+@media screen and (max-width: 1024px) {
+  form[name=contact] {
+    width: 75vw;
+    max-width: 800px
+  }
+}
+@media screen and (max-width: 800px) {
+  form[name=contact] {
+    width: 80vw;
+    margin: 0 auto;
+  }
+}
+@media screen and (max-width: 600px) {
+  form[name=contact] {
+    width: 90vw;
+    margin: 0 auto;
+  }
+}
+input,
+textarea,
+button {
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  border-color: var(--fgColour);
+  background-color: var(--bgColour);
+  outline: none;
+  border-style: solid;
+  border-width: 1px;
+  font-weight: 500;
+  color: var(--fgColour)
+}
+textarea {
+  height: 10rem;
+}
+form[name=shorten] input[type=url] {
+  width: 70vw;
+  max-width: 800px;
+}
+form[name=contact] input,
+form[name=contact] textarea {
+  width: calc(100% - 1rem - 2px);
+}
+input:focus,
+input:active,
+textarea:focus,
+textarea:active {
+  background-color: var(--fgColour);
+  color: var(--bgColour);
+}
+input:focus::placeholder,
+input:active::placeholder,
+textarea:focus::placeholder,
+textarea:active::placeholder {
+  color: var(--bgColour);
+}
+::placeholder,
+input[type=url]::placeholder,
+input[type=url]::-moz-placeholder {
+  color: var(--fgColour);
+  font-weight: 300;
+  font-size: 1.25rem;
+  opacity: 1;
+}
+button {
+  border-width: 1px 1px 1px 0;
+  font-weight: 100;
+  color: var(--fgColour);
+  margin-left: 0;
+}
+form[name=contact] button {
+  border-width: 1px;
+}
+button:focus,
+button:hover {
+  background-color: var(--fgColour);
+  color: var(--bgColour)
+}
+button:active {
+  background-color: var(--fgColour);
+  border-color: var(--fgColour);
+}
+/**
+ * Tip/Result text
+ */
+#result {
+  font-size: 1.25rem;
+  font-weight: 400;
+  width: 80vw;
+  max-width: 800px;
+  height: 40px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#result .qrlink,
+#result strong {
+  margin: 0 1rem;
+}
+footer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 80vw;
+  margin: 0 auto;
+  justify-content: space-between;
+  margin-bottom: 4vh;
+}
+/**
+ * Page footer
+ */
+footer section {
+  width: 39vw;
+}
+footer p {
+  line-height: 1.25rem;
+  text-align: justify;
+}
+footer .copyright {
+  margin-top: 1vh;
+  width: 100%;
+}
+footer .copyright p {
+  text-align: center;
+}
+@media screen and (max-width: 600px) {
+  footer section {
+    width: 100%;
+  }
+}
+
+/**
+ * Link list
+ */
+#linklist table {
+  width: 90vw;
+  max-width: 1024px;
+}
+th,
+td {
+  text-align: left;
+  padding: 0.15rem 0.5rem;
+}
+th {
+  background-color: var(--fgColour);
+  color: var(--bgColour);
+  /* padding: 0.15rem 0.5rem; */
+}
+td.disable {
+  text-align: center;
+}
+#result a,
+#codelist a {
+  cursor: pointer;
+}
+caption {
+  margin-bottom: 1rem;
+  font-style: italic;
+  min-height: 2.5rem;
+}
+td a {
+  font-weight: normal;
+}
+@media screen and (max-width: 600px) {
+  #linklist table th,
+  #linklist table td {
+    display: block;
+  }  
+}

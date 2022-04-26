@@ -1,0 +1,10 @@
+node_modules
+.vscode
+# _redirects
+.env*
+
+# Local Netlify folder
+.netlify
+
+_headers
+_redirects

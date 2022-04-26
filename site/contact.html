@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Contact | FYDLI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" type="text/css" href="/assets/styles.css">
+    <meta name="robots" content="index, nofollow, noarchive">
+    <!--
+      favicon assest via https://favicon.io
+    -->
+    <link rel="icon" href="/assets/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+  </head>
+  <body>
+
+    <main id="contact">
+
+      <h1>Contact</h1>
+
+      <section><a href="/" title="Home">&laquo; Home</a></section>
+
+      <form name="contact">
+        <p>
+          <label>Name:<br>
+            <input type="text" name="yourname" placeholder="John Doe" required aria-required="true">
+          </label>
+        </p>
+        <p>
+          <label>Email:<br>
+            <input type="email" name="email_address" placeholder="john.doe@example.com" required aria-required="true">
+          </label>
+        </p>
+        <p>
+          <label>Short URL<br>
+            <input type="text" name="short_url" placeholder="short">
+          </label>
+        </p>
+        <p>
+          <label>Message<br>
+            <textarea name="message" required aria-required="true"></textarea>
+          </label>
+        </p>
+        <p>
+          <button type="submit">Send</button>
+        </p>
+      </form>
+
+      <p id="result">&nbsp;</p>
+
+    </main>
+
+    <footer>
+
+      <section class="copyright">
+        <p>&copy; FYDLI | <a href="/license" title="License">Jam License</a> | <a href="/git" title="GitHub Repository">GitHub</a> | <a href="/terms" title="Terms of Use">Terms</a></p>
+      </section>
+
+    </footer>
+
+    <script nonce="9fe3abc61d7a">
+      document.forms.contact.addEventListener('submit', async (event) => {
+
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+        const data = {};
+
+        for (const key of formData.keys()) {
+          data[key] = formData.get(key);
+        }
+        const result = document.getElementById('result');
+        result.innerHTML = "Sending...";
+
+        fetch("/app/sendmsg", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(d => result.innerHTML = d.msg)
+        .catch(err => result.innerHTML = err)
+      });
+    </script>
+
+  </body>
+</html>

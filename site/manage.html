@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Manage Links | FYDLI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" type="text/css" href="/assets/styles.css">
+    <meta name="robots" content="index, nofollow, noarchive">
+    <meta name="referrerpolicy" content="no-referrer">
+    <!--
+      favicon assest via https://favicon.io
+    -->
+    <link rel="icon" href="/assets/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+  </head>
+  <body>
+
+    <main id="linklist">
+
+      <h1>Manage Links</h1>
+
+      <section><p><a href="/" title="Home">&laquo; Home</a></p></section>
+      
+      <section>
+        <table>
+          <caption>Click short code to copy to clipboard. Click long URL to visit using short link.<br><em>Disabling short code is <strong>irreversible.</strong></em></caption>
+          <thead>
+            <tr>
+              <th>Short</th>
+              <th>QR Code</th>
+              <th>Long</th>
+              <th>Created</th>
+              <th>Disable</th>
+            </tr>
+          </thead>
+          <tbody id="codelist">
+            <tr id="listloading"><td colspan="4">Loading...</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <footer>
+
+      <section class="copyright">
+        <p>&copy; FYDLI | <a href="/license" title="License">Jam License</a> | <a href="/git" title="GitHub Repository">GitHub</a> | <a href="/terms" title="Terms of Use">Terms</a></p>
+      </section>
+
+    </footer>
+
+    <template id="codeLink">
+      <tr>
+        <td class="sCode">
+          <a
+            class="shortcode"
+            role="link"
+            aria-roledescription="Press Enter to copy link to clipboard"
+            tabindex="0"
+          ></a>
+        </td>
+        <td class="qrCode"><a class="vqrcode" href="" target="_blank">view</a>|<a class="dlqrcode" href="">DL</a></td>
+        <td class="visit"><a class="visitlink" href="" target="_blank"><code></code></a></td>
+        <td class="createtime"></td>
+        <td class="disable">
+          <a
+            class="delcode"
+            role="button"
+            aria-roledescription="Disable a short URL"
+            tabindex="0"
+          >X</a>
+        </td>
+      </tr>
+    </template>
+
+    <script nonce="9fe3abc61d7a">
+      //
+      // SPDX-License-Identifier: Jam
+      //
+
+      // No codes message
+      const noCodesMsg = "No short codes created...";
+      // Default caption text
+      const captionText = "Click short code to copy to clipboard. Click long URL to visit using short link.<br><em>Disabling short code is <strong>irreversible.</strong></em>";
+      // Site URL
+      const siteUrl = "https://fyd.li"
+
+      noLinks = () => {
+        const tr = document.createElement('tr');
+        tr.id = "noLinks";
+        const td = document.createElement('td');
+        td.colSpan = 4;
+        td.align = 'center';
+        td.innerHTML = noCodesMsg;
+        tr.appendChild(td);
+        codelist.appendChild(tr);
+      };
+      // Copy Short URL
+      copyShortLink = (e) => {
+        if (e.code === "Enter" || e.type === "click") {
+          // The short link
+          const code = e.target.dataset.shortCode;
+          const sl = `${siteUrl}/${code}`;
+          // Wrap in a try/catch in the off chance clipboard events disabled
+          try {
+            // Write to clipboard
+            navigator.clipboard.writeText(sl).then(res => {
+
+              // Display success message
+              const msg = `<strong>${sl}</strong> copied to clipboard successfully`;
+              const caption = document.querySelector('caption');
+              caption.innerHTML = msg;
+
+              // Clear message, write default caption text again
+              setTimeout(() => {
+                caption.innerHTML = captionText;
+              }, 1500);
+            });
+          }
+          catch(err) {
+            alert(`Unable to copy ${sl} to clipboard.`);
+            console.log(err);
+          }
+        }
+      };
+      disableShortCode = async (e) => {
+        if (e.code === "Enter" || e.type === "click"){
+          // For UI feedback
+          const code = e.target.dataset.shortCode
+          const successMsg = `<strong>${code}</strong> successfully disabled.`;
+          const failMsg = `Error disabling <strong>${code}</strong>.`;
+          const caption = document.querySelector('caption');
+
+          // Send request to Supabase
+          const response = await fetch('/app/update-code', {
+            method: "POST",
+            body: JSON.stringify({
+                short: code,
+                userId: fydliID
+            })
+          });
+
+          // JSON data
+          const data = await response.json();
+
+          // If response is good
+          if (data.updated === true) {
+            // Remove link element from list.
+            const list = document.getElementById('codelist');
+            const item = document.getElementById('code-'.concat(code));
+            list.removeChild(item);
+            // Display success message
+            caption.innerHTML = successMsg;
+            // No more links?
+            if (list.children.length === 0) {
+              list.innerText = noCodesMsg
+            }
+          }
+          // Response bad.
+          else {
+            // Display error message
+            console.log("Error: ", data.message);
+            caption.innerHTML = failMsg;
+          }
+
+          // Reinstate default message
+          setTimeout(() => {
+            caption.innerHTML = captionText;
+          }, 1500);
+        }
+      };
+      // link item template
+      const template = document.querySelector('#codeLink');
+      // link list element
+      const codelist = document.querySelector('#codelist');
+      // read userID from storage only create on shortener page
+      const fydliID = localStorage.getItem('fydli_user_id');
+
+      // Get list of links from Supabase on page load
+      document.addEventListener("DOMContentLoaded", async () => {
+
+        const listloader = document.getElementById('listloading');
+
+        // If user ID missing do nothing further
+        if (fydliID === null) {
+          codelist.removeChild(listloader);
+          noLinks();
+          return false;
+        }
+
+        // Fetch via function
+        const data = await fetch('/app/link-list', {
+          method: "POST",
+          headers: {
+            'Content-Type': "application/json"
+          },
+          // fetches codes based on userId; fails if missing
+          body: JSON.stringify({userId: fydliID})
+        });
+
+        // Result as JSON
+        const res = await data.json();
+
+        // Make sure something exists
+        if (res.length > 0) {
+          
+          // Removing loading text
+          codelist.removeChild(listloader);
+
+          // Loop through each to display
+          res.forEach((d) => {
+            const code = d.short;
+            const href = d.long
+            // displayCode(d.short, d.long)
+            const container = template.content.cloneNode(true);
+
+            // Add ID to <tr> for delete button
+            container.querySelector('tr').id = "code-".concat(code);
+
+            // Short code details
+            const short = container.querySelector('.shortcode');
+            // link.href = '/'.concat(code);
+            short.dataset.shortCode = code;
+            short.innerText = code;
+
+            // Copy to clipboard function
+            short.addEventListener('click', copyShortLink);
+            // Keyboard copy support.
+            short.addEventListener('keydown', copyShortLink);
+            
+            // Show the long link too; visit using short URL
+            const vqrcode = container.querySelector('.vqrcode');
+            vqrcode.href = `/qr/${code}`;
+            const dlqrcode = container.querySelector('.dlqrcode');
+            dlqrcode.href = `/qr/dl/${code}`;
+
+            // Show the long link too; visit using short URL
+            const visit = container.querySelector('.visitlink');
+            visit.href = `${siteUrl}/${code}`;
+            visit.querySelector('code').innerText = href.replace('https://','');
+
+            const created_at = new Date(d.created_at);
+            container.querySelector('.createtime').innerText = created_at.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'});
+
+            // Delete button
+            const del = container.querySelector('.delcode');
+            del.dataset.shortCode = code;
+
+            // Add a delete button
+            del.addEventListener('click', disableShortCode);
+            del.addEventListener('keydown', disableShortCode);
+
+            // Append node to display element
+            codelist.appendChild(container);
+
+          })
+        }
+        // Display no links message
+        else {
+          codelist.removeChild(listloader);
+          noLinks();
+        }
+      });
+    </script>
+    
+  </body>
+</html>

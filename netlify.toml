@@ -1,0 +1,74 @@
+#
+# Basic configuration
+# Modify as required/desired.
+#
+
+# Change as required
+[build]
+  # After this, remove base and uncomment command and publish below
+  command = "npm run build"
+  publish = "site"
+
+  # Defining non-sensitive environment variables here is possible
+  # as long as the aren't required in a function.
+  # [build.environment]
+  #   VARIABLE = "value"
+
+# Using `import` so need `esbuild`
+[functions]
+  node_bundler = "esbuild"
+
+# Local testing
+[dev]
+  # Would prefer if false was the default!
+  autoLaunch = false
+  # When site isn't linked, this is handy.
+  offline = true
+
+#
+# Headers
+#
+# Customise headers as required.
+#
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    Content-Security-Policy = "base-uri 'self'; script-src 'self' 'nonce-9fe3abc61d7a'; style-src 'self' 'nonce-9fe3abc61d7a'; img-src 'self'; object-src 'self'; frame-ancestors 'none'"
+    Referrer-Policy = "no-referrer"
+    X-Robots-Tag = "index, nofollow, noarchive, nosnippet, notranslate"
+    Link = '<https://fyd.li/assets/styles.css>; rel="preload"; as="style"'
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+  
+#
+# REMEMBER:
+# `_redirects` is processed first, followed by `redirects` in netlify.toml
+# No redirects are "forced", so if a path exists that is equal to that of a
+# redirect, the path content is served.
+# 
+
+# QR Code generator.
+[[redirects]]
+  from = "/qr/*"
+  to = "/.netlify/functions/qrcode"
+  status = 200
+
+# Functions rewrite.
+[[redirects]]
+  from = "/app/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# ########################################################################### #
+#                                                                             #
+#                    DO NOT PUT ANY REDIRECTS BELOW HERE!                     #
+#                                                                             #
+# ########################################################################### #
+
+# This is the fallback so capture any
+# path that doesn't exist in `_redirects`
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/redir"
+  status = 200

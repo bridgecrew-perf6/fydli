@@ -1,0 +1,32 @@
+{
+  "name": "fydli",
+  "version": "0.3.2",
+  "description": "JAMStack link shortener using Netlify functions and Supabase.",
+  "keywords": [
+    "link-shortener",
+    "jamstack",
+    "netlify",
+    "netlify-functions",
+    "scheduled-functions",
+    "supabase"
+  ],
+  "private": true,
+  "scripts": {
+    "build": "node build-site.mjs"
+  },
+  "author": {
+    "name": "Coel May",
+    "url": "https://coelmay.net"
+  },
+  "license": "Jam",
+  "dependencies": {
+    "@supabase/supabase-js": "^1.30.0",
+    "netlify": "^11.0.0",
+    "node-fetch": "^3.2.0",
+    "nodemailer": "^6.7.2",
+    "qrcode": "^1.5.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.0"
+  }
+}
