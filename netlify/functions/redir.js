@@ -71,7 +71,7 @@ exports.handler = async (event) => {
           <main>
             <h1>${process.env.SITE_TITLE}</h1>
             <p>Oops! ${path} isn't a valid URL.</p>
-            ${ String(process.env.PUBLIC_SITE) === "true" ? `<p><a href="/" title="Shorten a URL">Shorten one</a></p>`:`` }
+            <p><a href="/" title="Shorten a URL">Shorten one</a></p>
           </main>
         </body>
       </html>`

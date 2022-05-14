@@ -69,7 +69,7 @@ exports.handler = async (event) => {
           <main>
             <h1>${process.env.SITE_TITLE}</h1>
             <p>Oops! ${domain}/${code} isn't a valid URL.</p>
-            ${ String(process.env.PUBLIC_SITE) === "true" ? `<p><a href="/" title="Home">&laquo; Home</a></p>`:`` }
+            <p><a href="/" title="Home">&laquo; Home</a></p>
           </main>
         </body>
       </html>`
@@ -143,7 +143,7 @@ exports.handler = async (event) => {
           <main>
             <h1>${process.env.SITE_TITLE}</h1>
             <p>Oops! Looks like there was an error generating the QR Code.</p>
-            ${ String(process.env.PUBLIC_SITE) === "true" ? `<p><a href="/" title="Home">&laquo; Home</a></p>`:`` }
+            <p><a href="/" title="Home">&laquo; Home</a></p>
           </main>
         </body>
       </html>`
