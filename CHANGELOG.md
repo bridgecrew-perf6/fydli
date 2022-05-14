@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v0.4.0
+
+Reduced `new-link.js`, `update-code.js`, and `link-list.js` into a single function `app.js` using express using router middleware to check the existence of the user ID header.
+
+`new-uuid.js`, `qrcode.js`. `sendmsg.js`, and `redir.js` are still individual functions as they do not rely on the user ID header to interact with Supabase.
+
+Inspiration for this version taken from [How to run Express.js apps with Netlify Functions](https://www.netlify.com/blog/2018/09/13/how-to-run-express.js-apps-with-netlify-functions/)
+
 ## v0.3.2
 
 ### Now With QR Codes!
