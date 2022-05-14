@@ -57,7 +57,7 @@
 # Functions rewrite.
 [[redirects]]
   from = "/app/*"
-  to = "/.netlify/functions/:splat"
+  to = "/.netlify/functions/app"
   status = 200
 
 # ########################################################################### #
