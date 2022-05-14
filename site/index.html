@@ -111,8 +111,14 @@
 
         event.preventDefault();
 
-        const form = event.target.elements;
+        const { long_url } = event.target.elements;
         const result = document.getElementById('result');
+        
+        if (!long_url.value.startsWith('https://')) {
+          result.innerHTML = "URL must start with <code>https://</code>";
+          return;
+        }
+
         result.innerHTML = "Working...";
 
         copyShortLink = (e) => {
@@ -138,31 +144,32 @@
           }
         };
         
-        fetch("/app/new-link", {
+        fetch("/app/new", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            'fydli-id': fydliID
           },
           body: JSON.stringify({
-            long_url: form.long_url.value,
-            userId: fydliID
+            long_url: long_url.value
           })
         })
         .then(res => res.json())
-        .then(d => {
-          if (d.created === true) {
+        .then(data => {
+          const [ success, { code, err }] = data
+          if (success) {
             // Set image colours inverse of colour scheme
             // (dark = foreground, light = background)
             const imgColors = (window.matchMedia('(prefers-color-scheme: light)').matches === true) ? 'dark=fafafa,light=202020':'dark=202020,light=fafafa';
             // Output
-            result.innerHTML = `<a class="qrlink" href="/qr/dl/${d.code}" title="Download QR Code"><img src="/qr/width=40,${imgColors}/${d.code}" width="40" height="40"></a> <span>Copy to clipboard: <a id="shortLink" tabindex="0">${d.short_url}</a></span>`;
+            result.innerHTML = `<a class="qrlink" href="/qr/dl/${code}" title="Download QR Code"><img src="/qr/width=40,${imgColors}/${code}" width="40" height="40"></a> <span>Copy to clipboard: <a id="shortLink" tabindex="0">https://fyd.li/${code}</a></span>`;
             // Copy to clipboard event listener
             result.querySelector('a#shortLink').addEventListener('click', copyShortLink);
             // keyboard copy to clipboard
             result.querySelector('a#shortLink').addEventListener('keydown', copyShortLink);
           }
           else {
-            result.innerHTML = d.message;
+            result.innerHTML = err;
           }
         })
         .catch(err => result.innerHTML = err)
