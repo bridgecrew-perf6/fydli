@@ -3,8 +3,6 @@ SPDX-License-Identifier: Jam
 -->
 # FYDLI URL Shortener
 
-![Netlify Status](https://api.netlify.com/api/v1/badges/4d3b750a-245b-4d15-b237-8cb57553f4da/deploy-status)
-
 A URL shortener for the [JAMStack](https://jamstack.org).
 
 This URL shortener uses [Supabase](https://supabase.com) to store short code and the long URLs they are to redirect to.
